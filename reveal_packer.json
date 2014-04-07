@@ -6,14 +6,8 @@
 
   "provisioners": [{
     "type": "shell",
-    "inline": [
-      "sleep 30",
-      "sudo apt-get update",
-      "sudo apt-get install -y software-properties-common python-software-properties",
-      "sudo apt-add-repository -y ppa:rquillo/ansible",
-      "sudo apt-get update",
-      "sudo apt-get install -y ansible"
-    ]
+    "script": "bootstrap_ansible.sh",
+    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }}"
   },
   {
     "type": "ansible-local",
