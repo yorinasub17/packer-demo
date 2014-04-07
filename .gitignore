@@ -2,3 +2,4 @@ Vagrantfile
 *.ovf
 *.vmdk
 *.box
+*.tar
