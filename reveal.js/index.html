@@ -144,15 +144,15 @@
                 </section>
 
                 <section>
-                    <section>
-                        <h2>What do we do?</h2>
+                    <h2>What do we do?</h2>
 
-                        <ol>
-                            <li class="fragment" data-fragment-index="1">Unify dev environment</li>
-                            <li class="fragment" data-fragment-index="2">Unify Setup with Configuration Management Tool</li>
-                        </ol>
-                    </section>
+                    <ol>
+                        <li class="fragment" data-fragment-index="1">Unify dev environment</li>
+                        <li class="fragment" data-fragment-index="2">Unify Setup with Configuration Management Tool</li>
+                    </ol>
+                </section>
 
+                <section>
                     <section>
                         <h2>Configuration Management Tools</h2>
 
@@ -184,7 +184,7 @@
                     <section>
                         <h2>Ansible</h2>
 
-                        <p>TODO: IMAGE OF ANSIBLE GALAXY</p>
+                        <img src="images/ansible_galaxy.jpg" />
                     </section>
 
                     <section>
@@ -242,29 +242,151 @@
                 </section>
 
                 <section>
-                    <h2>Packer.IO</h2>
+                    <section>
+                        <h2>Packer.IO</h2>
 
-                    <p>TODO IMAGE FROM HOMEPAGE</p>
-                </section>
+                        <img src="images/packer_home.jpg" />
+                    </section>
 
-                <section>
-                    <h2>Packer.IO</h2>
+                    <section>
+                        <h2>Packer.IO</h2>
 
-                    <p>TODO EXAMPLE FOR AWS</p>
-                </section>
+                        <p>Basic Structure</p>
+                        <pre><code data-trim>
+{
+  "variables": "USER DEFINED VARIABLES (WITH DEFAULTS)",
 
-                <section>
-                    <h2>Packer.IO</h2>
-                    <p>TODO EXAMPLE FOR VIRTUALBOX+VAGRANT</p>
-                </section>
+  "provisioners": "LIST OF PROVISIONERS",
 
-                <section>
-                    <h2>Packer.IO</h2>
-                    <p>TODO EXAMPLE FOR DOCKER</p>
+  "builders": "LIST OF BUILDERS",
+
+  "post-processors": "LIST OF POST PROCESSORS"
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Packer.IO</h2>
+
+                        <p>Provisioners</p>
+                        <pre><code data-trim>
+{
+  "provisioners": [{
+    "type": "shell",
+    "script": "bootstrap_ansible.sh",
+    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }}"
+  },
+  {
+    "type": "ansible-local",
+    "playbook_file": "dev.yml"
+  }],
+
+  // ... snip ...
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Packer.IO</h2>
+
+                        <p>AWS EC2 AMI</p>
+                        <pre><code data-trim>
+{
+  // ... snip ...
+
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "source_ami": "ami-fa9cf1ca",
+    "instance_type": "m3.medium",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-example {{timestamp}}"
+  }],
+
+  // ... snip ...
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Packer.IO</h2>
+                        
+                        <p>Virtualbox + Vagrant post processor</p>
+                        <pre><code data-trim>
+{
+  // ... snip ...
+
+  "builders": [{
+    "type": "virtualbox-ovf",
+    "source_path": "box.ovf",
+    "format": "ovf",
+
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "60m",
+    "shutdown_command": "echo 'shutdown -P now' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+    "headless": true,
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--vram", "32"],
+      ["modifyvm", "{{.Name}}", "--memory", "2048"],
+      ["modifyvm", "{{.Name}}", "--cpus", "4"]
+    ]
+  }],
+
+  "post-processors": [{
+    "type": "vagrant",
+    "compression_level": 3,
+    "only": ["virtualbox-ovf"]
+  }]
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Packer.IO</h2>
+
+                        <p>Docker (just for kicks!)</p>
+                        <pre><code data-trim>
+{
+  // ... snip ...
+
+  "builders": [{
+    "type": "docker",
+    "image": "ubuntu:precise",
+    "export_path": "packer_demo_ubuntu_docker.tar"
+  }],
+
+  // ... snip ...
+}
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Packer.IO</h2>
+
+                        <pre><code data-trim>
+packer build \
+    -var 'aws_access_key=foo' \
+    -var 'aws_secret_key=foo' \
+    template.json
+                        </code></pre>
+                    </section>
                 </section>
 
                 <section>
                     <h2>Live Demo</h2>
+                </section>
+
+                <section>
+                    <h2>Questions?</h2>
                 </section>
 
             </div>
