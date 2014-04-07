@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Using Packer.io with Ansible for a "unified" reproducible Machine Image</title>
+
+		<meta name="description" content="A presentation on how Captricity can use Packer.io to cater to multiple dev environments">
+		<meta name="author" content="Yoriyasu Yano">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <style>
+            .reveal img {
+                max-height: 70%;
+            }
+            .reveal table td {
+                text-align: center;
+                width: 45%;
+                height: 110px;
+                vertical-align: middle;
+            }
+            .reveal table td img {
+                max-height: 100px;
+            }
+            .reveal table.arrows td {
+                font-size: 2em;
+                width: auto;
+            }
+        </style>
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+            <div class="slides">
+
+                <section>
+                    <h2>Packer.IO with Ansible</h2>
+                    <h3>How to Stay Sane With Multiple Dev Environments</h3>
+                    <p>Yoriyasu Yano</p>
+                </section>
+
+                <section>
+                    <h2>Captricity Dev: Status Quo</h2>
+
+                    <table class="reveal">
+                        <tr>
+                            <td class="fragment" data-fragment-index="1">
+                                <img class="dev-env-icon" src="images/1197107206400036309metalmarious_Laptop.svg.thumb.png" />
+                                <img class="dev-env-icon" src="images/ubuntu-logo32.png" />
+                            </td>
+                            <td class="fragment" data-fragment-index="3"><img class="dev-env-icon" src="images/macbook_air_design_screen.gif" /></td>
+                        </tr>
+                        <tr>
+                            <td class="fragment" data-fragment-index="2">12.04 & 13.10</td>
+                            <td class="fragment" data-fragment-index="4"><img class="dev-env-icon" src="images/Virtualbox_logo.png" /></td> 
+                        </tr>
+                        <tr>
+                            <td colspan=2 class="fragment" data-fragment-index="5"><img class="dev-env-icon" src="images/AWS_large.jpg" /></td>
+                        </tr>
+
+                    </table>
+
+                    <aside class="notes">
+                        1. Ubuntu Native
+                        2. Different ubuntu versions
+                        3. Macbook Native
+                        4. Virtualbox with ubuntu
+                        5. AWS popup dev
+                    </aside>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>What's wrong?</h2>
+
+                        <ul>
+                            <li class="fragment">Different packages in different environments</li>
+                            <li class="fragment">Not shared</li>
+                            <li class="fragment">Unreproducible</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>What's wrong?</h2>
+
+                        <table class="reveal arrows">
+                            <tr>
+                                <td>
+                                    <img class="dev-env-icon" src="images/1197107206400036309metalmarious_Laptop.svg.thumb.png" />
+                                    <img class="dev-env-icon" src="images/ubuntu-logo32.png" />
+                                </td>
+                                <td class="fragment" data-fragment-index="1">&#8594;</td>
+                                <td><img class="dev-env-icon" src="images/macbook_air_design_screen.gif" /></td>
+                            </tr>
+                            <tr>
+                                <td class="fragment" data-fragment-index="1">&#8595;</td>
+                                <td class="fragment" data-fragment-index="1">&#8600;</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><img class="dev-env-icon" src="images/AWS_large.jpg" /></td>
+                                <td></td>
+                                <td><img class="dev-env-icon" src="images/Virtualbox_logo.png" /></td> 
+                            </tr>
+                        </table>
+
+                    </section>
+
+                    <section>
+                        <h2>What's wrong?</h2>
+
+                        <p><code>sudo apt-get install nodejs</code></p>
+                        <p><code>sudo brew install node</code></p>
+                        <p><code>sudo port install nodejs</code></p>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h2>What do we do?</h2>
+
+                        <ol>
+                            <li class="fragment" data-fragment-index="1">Unify dev environment</li>
+                            <li class="fragment" data-fragment-index="2">Unify Setup with Configuration Management Tool</li>
+                        </ol>
+                    </section>
+
+                    <section>
+                        <h2>Configuration Management Tools</h2>
+
+                        <ul>
+                            <li>Repeatable</li>
+                            <li>Automated</li>
+                            <li>Documentation for installation/setup</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <img src="images/AnsibleLogo_transparent_web.png" />
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <ul>
+                            <li class="fragment">Implemented in python</li>
+                            <li class="fragment">YAML configuration</li>
+                            <li class="fragment">Simple execution: SSH + Shell</li>
+                            <li class="fragment">Agent-less install and deploy => Excellent performance</li>
+                            <li class="fragment">Ever expanding playbook library</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <p>TODO: IMAGE OF ANSIBLE GALAXY</p>
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <pre><code data-trim>
+---
+- hosts: all
+  tasks:
+  - name: Install node.js
+    apt: pkg=nodejs update_cache=yes
+    sudo: yes
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <p>When adding a new package or build step, simply update the playbook and check it back into repo</p>
+                        <pre><code data-trim>
+---
+- hosts: all
+  tasks:
+  - name: Install node.js
+    apt: pkg=nodejs update_cache=yes
+    sudo: yes
++  - name: Install grunt CLI
++    command: npm install -g grunt-cli
++    sudo: yes
+                        </code></pre>
+                    </section>
+
+                    <section>
+                        <h2>Ansible</h2>
+
+                        <p>Problems</p>
+                        <ul>
+                            <li class="fragment">Playbook OS dependent</li>
+                            <li class="fragment">Relatively young: core modules are still being fleshed out</li>
+                            <li class="fragment">YAML syntax takes getting used to</li>
+                            <li class="fragment">Custom commands difficult to make idempotent</li>
+                        </ul>
+                    </section>
+                </section>
+
+                <section>
+                    <h2>Virtualbox and AWS</h2>
+
+                    <img class="dev-env-icon" src="images/AWS_large.jpg" />
+                    <img class="dev-env-icon" src="images/Virtualbox_logo.png" />
+
+                    <aside class="notes">
+                        Wouldn't it be nice if we didn't have to install everything each time?
+                    </aside>
+                </section>
+
+                <section>
+                    <h2>Packer.IO</h2>
+
+                    <p>TODO IMAGE FROM HOMEPAGE</p>
+                </section>
+
+                <section>
+                    <h2>Packer.IO</h2>
+
+                    <p>TODO EXAMPLE FOR AWS</p>
+                </section>
+
+                <section>
+                    <h2>Packer.IO</h2>
+                    <p>TODO EXAMPLE FOR VIRTUALBOX+VAGRANT</p>
+                </section>
+
+                <section>
+                    <h2>Packer.IO</h2>
+                    <p>TODO EXAMPLE FOR DOCKER</p>
+                </section>
+
+                <section>
+                    <h2>Live Demo</h2>
+                </section>
+
+            </div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: 'solarized', // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
