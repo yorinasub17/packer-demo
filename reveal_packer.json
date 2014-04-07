@@ -1,0 +1,61 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo apt-get update",
+      "sudo apt-get install -y software-properties-common python-software-properties",
+      "sudo apt-add-repository -y ppa:rquillo/ansible",
+      "sudo apt-get update",
+      "sudo apt-get install -y ansible"
+    ]
+  },
+  {
+    "type": "ansible-local",
+    "playbook_file": "dev.yml"
+  }],
+
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-west-2",
+    "source_ami": "ami-fa9cf1ca",
+    "instance_type": "m3.medium",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-example {{timestamp}}"
+  },
+  {
+    "type": "virtualbox-ovf",
+    "source_path": "box.ovf",
+    "format": "ovf",
+
+    "ssh_username": "vagrant",
+    "ssh_password": "vagrant",
+    "ssh_port": 22,
+    "ssh_wait_timeout": "60m",
+    "shutdown_command": "echo 'shutdown -P now' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+    "headless": true,
+    "vboxmanage": [
+      ["modifyvm", "{{.Name}}", "--vram", "32"],
+      ["modifyvm", "{{.Name}}", "--memory", "2048"],
+      ["modifyvm", "{{.Name}}", "--cpus", "4"]
+    ]
+  },
+  {
+    "type": "docker",
+    "image": "ubuntu:precise",
+    "export_path": "packer_demo_ubuntu_docker.tar"
+  }],
+
+  "post-processors": [{
+    "type": "vagrant",
+    "compression_level": 3,
+    "only": ["virtualbox-ovf"]
+  }]
+}

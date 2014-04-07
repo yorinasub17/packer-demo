@@ -1,0 +1,4 @@
+Vagrantfile
+*.ovf
+*.vmdk
+*.box

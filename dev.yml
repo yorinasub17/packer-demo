@@ -1,0 +1,42 @@
+---
+- hosts: all
+
+  tasks:
+  - name: Node.js | Package prerequisites for node.js
+    apt: pkg={{ item }} state=installed
+    tags: nodejs
+    sudo: yes
+    with_items:
+      - python-software-properties
+      - python
+      - g++
+      - make
+      - git-core
+  
+  - name: Node.js | Add the node.js PPA
+    command: add-apt-repository -y ppa:chris-lea/node.js creates=/etc/apt/sources.list.d/chris-lea-node_js-precise.list
+    tags: nodejs
+    sudo: yes
+  
+  - name: Node.js | Install nodejs and npm
+    apt: pkg=nodejs state=installed update-cache=yes
+    tags: nodejs
+    sudo: yes
+
+  - name: Reveal Server | Create server root dir
+    file: path=/srv state=directory owner={{ ansible_user_id }} group={{ ansible_user_id }}
+    tags: revealjs
+    sudo: yes
+
+  - name: Reveal Server | Check out code
+    git: repo=https://github.com/yorinasub17/packer-demo.git dest=/srv/packer-demo accept_hostkey=yes
+    tags: revealjs
+
+  - name: Reveal Server | Install grunt-cli
+    command: chdir=/srv/packer-demo/reveal.js npm install -g grunt-cli
+    tags: revealjs
+    sudo: yes
+
+  - name: Reveal Server | Install dependent packages
+    command: chdir=/srv/packer-demo/reveal.js npm install
+    tags: revealjs
